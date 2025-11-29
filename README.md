@@ -61,7 +61,7 @@ Edge cases receive dedicated handling: missing fields fall back to safe defaults
 
 - **Single scorer class** keeps the heuristics centralized and makes strategy swaps trivial (just change a weight profile).
 - **Serializer-first validation** catches malformed payloads before the algorithm runs, while the scorer still guards against missing data for reuse from the model layer.
-- **Vanilla frontend** (no build step) to keep setup fast for reviewers; it talks to `/api/v1` via `fetch` and renders explanations inline.
+- **frontend** (no build step) to keep setup fast for reviewers; it talks to `/api/v1` via `fetch` and renders explanations inline.
 - **Task model hook** uses the same scorer to compute a complexity metric, showcasing reuse and guaranteeing stored records always have a priority snapshot.
 - **Tests cover behavior** (13 cases) so we can refactor the algorithm with confidence.
 
@@ -77,9 +77,6 @@ Edge cases receive dedicated handling: missing fields fall back to safe defaults
 
 Total ≈ 3h 40m.
 
-## Bonus Challenges
-
-None attempted due to timebox. My next pick would be an Eisenhower matrix visualization fed by the same scoring metadata.
 
 ## Future Improvements
 
