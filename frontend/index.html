@@ -1,11 +1,15 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Smart Task Analyzer</title>
-    <link rel="stylesheet" href="/static/styles.css">
+
+    <!-- Correct Django static reference -->
+    <link rel="stylesheet" href="{% static 'styles.css' %}">
 </head>
+
 <body>
     <div class="container">
         <!-- Header -->
@@ -33,8 +37,6 @@
         <!-- Input Section -->
         <section class="input-section">
             <h2>📝 Add Tasks</h2>
-            
-            <!-- Individual Task Form -->
             <div class="form-container">
                 <h3>Add Individual Task</h3>
                 <form id="task-form" class="task-form">
@@ -71,7 +73,6 @@
                 </form>
             </div>
 
-            <!-- Bulk JSON Import -->
             <div class="form-container">
                 <h3>Or Paste JSON Tasks</h3>
                 <textarea 
@@ -83,7 +84,6 @@
                 <button id="import-json-btn" class="btn btn-secondary">Import JSON</button>
             </div>
 
-            <!-- Current Tasks Display -->
             <div class="current-tasks" id="current-tasks-section" style="display: none;">
                 <h3>Current Tasks (<span id="task-count">0</span>)</h3>
                 <div id="task-list" class="task-list"></div>
@@ -94,29 +94,21 @@
             </div>
         </section>
 
-        <!-- Loading Indicator -->
         <div id="loading" class="loading" style="display: none;">
             <div class="spinner"></div>
             <p>Analyzing tasks...</p>
         </div>
 
-        <!-- Error Message -->
         <div id="error-message" class="error-message" style="display: none;"></div>
-
-        <!-- Success Message -->
         <div id="success-message" class="success-message" style="display: none;"></div>
 
-        <!-- Output Section -->
         <section class="output-section" id="output-section" style="display: none;">
             <h2>📊 Analysis Results</h2>
-            
-            <!-- Top Suggestions -->
             <div class="suggestions-container" id="suggestions-container">
                 <h3>🎯 Top 3 Recommendations</h3>
                 <div id="suggestions-list" class="suggestions-list"></div>
             </div>
 
-            <!-- All Tasks Sorted -->
             <div class="results-container">
                 <h3>All Tasks (Sorted by Priority)</h3>
                 <div id="results-list" class="results-list"></div>
@@ -124,6 +116,7 @@
         </section>
     </div>
 
-    <script src="/static/script.js"></script>
+    <!-- JS loaded through Django static -->
+    <script src="{% static 'script.js' %}"></script>
 </body>
 </html>
