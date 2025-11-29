@@ -26,10 +26,10 @@ SECRET_KEY = os.getenv(
 DEBUG = os.getenv('DEBUG', 'True') == 'True'
 
 # Allow common local addresses by default so dev server works out of the box
-default_allowed = '127.0.0.1,localhost'
 ALLOWED_HOSTS = [
-    host.strip() for host in os.getenv('ALLOWED_HOSTS', default_allowed).split(',')
-    if host.strip()
+    'smart-task-analyzer-9.onrender.com',
+    'localhost',
+    '127.0.0.1'
 ]
 # ==============================================
 
