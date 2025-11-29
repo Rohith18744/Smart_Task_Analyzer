@@ -1,4 +1,4 @@
-
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -37,6 +37,8 @@
         <!-- Input Section -->
         <section class="input-section">
             <h2>📝 Add Tasks</h2>
+
+            <!-- Individual Task Form -->
             <div class="form-container">
                 <h3>Add Individual Task</h3>
                 <form id="task-form" class="task-form">
@@ -44,49 +46,52 @@
                         <label for="task-title">Task Title *</label>
                         <input type="text" id="task-title" required placeholder="e.g., Fix login bug">
                     </div>
-                    
+
                     <div class="form-row">
                         <div class="form-group">
                             <label for="task-due-date">Due Date *</label>
                             <input type="date" id="task-due-date" required>
                         </div>
-                        
+
                         <div class="form-group">
                             <label for="task-hours">Estimated Hours *</label>
                             <input type="number" id="task-hours" min="0.1" step="0.1" value="2" required>
                         </div>
                     </div>
-                    
+
                     <div class="form-row">
                         <div class="form-group">
                             <label for="task-importance">Importance (1-10) *</label>
                             <input type="number" id="task-importance" min="1" max="10" value="5" required>
                         </div>
-                        
+
                         <div class="form-group">
                             <label for="task-dependencies">Dependencies (comma-separated IDs)</label>
                             <input type="text" id="task-dependencies" placeholder="e.g., 1,2,3">
                         </div>
                     </div>
-                    
+
                     <button type="submit" class="btn btn-primary">Add Task</button>
                 </form>
             </div>
 
+            <!-- JSON Import -->
             <div class="form-container">
                 <h3>Or Paste JSON Tasks</h3>
                 <textarea 
-                    id="json-input" 
-                    class="json-input" 
+                    id="json-input"
+                    class="json-input"
                     placeholder='[{"id": 1, "title": "Task 1", "due_date": "2025-12-01", "estimated_hours": 3, "importance": 8, "dependencies": []}]'
                     rows="8"
                 ></textarea>
                 <button id="import-json-btn" class="btn btn-secondary">Import JSON</button>
             </div>
 
+            <!-- Current Tasks -->
             <div class="current-tasks" id="current-tasks-section" style="display: none;">
                 <h3>Current Tasks (<span id="task-count">0</span>)</h3>
                 <div id="task-list" class="task-list"></div>
+
                 <div class="action-buttons">
                     <button id="analyze-btn" class="btn btn-success">🚀 Analyze Tasks</button>
                     <button id="clear-btn" class="btn btn-danger">Clear All</button>
@@ -94,16 +99,20 @@
             </div>
         </section>
 
+        <!-- Loading -->
         <div id="loading" class="loading" style="display: none;">
             <div class="spinner"></div>
             <p>Analyzing tasks...</p>
         </div>
 
+        <!-- Messages -->
         <div id="error-message" class="error-message" style="display: none;"></div>
         <div id="success-message" class="success-message" style="display: none;"></div>
 
+        <!-- Results -->
         <section class="output-section" id="output-section" style="display: none;">
             <h2>📊 Analysis Results</h2>
+
             <div class="suggestions-container" id="suggestions-container">
                 <h3>🎯 Top 3 Recommendations</h3>
                 <div id="suggestions-list" class="suggestions-list"></div>
@@ -116,7 +125,7 @@
         </section>
     </div>
 
-    <!-- JS loaded through Django static -->
+    <!-- Load JS through Django static -->
     <script src="{% static 'script.js' %}"></script>
 </body>
 </html>
