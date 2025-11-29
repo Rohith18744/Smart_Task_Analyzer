@@ -3,8 +3,8 @@ const app = {
     tasks: [],
     nextId: 1,
     currentStrategy: 'smart_balance',
-    // Align with Django router path `path('api/v1/', include('tasks.urls'))`
-    apiBaseUrl: '/api/v1'
+    // Updated to use Render backend base URL
+    apiBaseUrl: 'https://smart-task-analyzer-14.onrender.com/api/v1'
 };
 
 const strategyDescriptions = {
@@ -24,17 +24,10 @@ document.addEventListener('DOMContentLoaded', function() {
  * Set up all event listeners
  */
 function initializeEventListeners() {
-    // Form submission
     document.getElementById('task-form').addEventListener('submit', handleTaskSubmit);
-    
-    // JSON import
     document.getElementById('import-json-btn').addEventListener('click', handleJsonImport);
-    
-    // Action buttons
     document.getElementById('analyze-btn').addEventListener('click', handleAnalyze);
     document.getElementById('clear-btn').addEventListener('click', handleClearAll);
-    
-    // Strategy selector
     document.getElementById('strategy-select').addEventListener('change', handleStrategyChange);
 }
 
@@ -54,14 +47,12 @@ function setDefaultDate() {
 function handleTaskSubmit(event) {
     event.preventDefault();
     
-    // Get form values
     const title = document.getElementById('task-title').value.trim();
     const dueDate = document.getElementById('task-due-date').value;
     const estimatedHours = parseFloat(document.getElementById('task-hours').value);
     const importance = parseInt(document.getElementById('task-importance').value);
     const dependenciesStr = document.getElementById('task-dependencies').value.trim();
     
-    // Parse dependencies
     let dependencies = [];
     if (dependenciesStr) {
         dependencies = dependenciesStr
@@ -70,48 +61,24 @@ function handleTaskSubmit(event) {
             .filter(id => !isNaN(id));
     }
     
-    // Validate form data
-    if (!title) {
-        showError('Please enter a task title');
-        return;
-    }
+    if (!title) return showError('Please enter a task title');
+    if (!dueDate) return showError('Please select a due date');
+    if (estimatedHours <= 0) return showError('Estimated hours must be greater than 0');
+    if (importance < 1 || importance > 10) return showError('Importance must be between 1 and 10');
     
-    if (!dueDate) {
-        showError('Please select a due date');
-        return;
-    }
-    
-    if (estimatedHours <= 0) {
-        showError('Estimated hours must be greater than 0');
-        return;
-    }
-    
-    if (importance < 1 || importance > 10) {
-        showError('Importance must be between 1 and 10');
-        return;
-    }
-    
-    // Create task object
     const task = {
         id: app.nextId++,
-        title: title,
+        title,
         due_date: dueDate,
         estimated_hours: estimatedHours,
-        importance: importance,
-        dependencies: dependencies
+        importance,
+        dependencies
     };
     
-    // Add to tasks array
     app.tasks.push(task);
-    
-    // Update UI
     updateTaskList();
-    
-    // Reset form
     document.getElementById('task-form').reset();
     setDefaultDate();
-    
-    // Show success message
     showSuccess(`Task "${title}" added successfully!`);
 }
 
@@ -120,124 +87,86 @@ function handleTaskSubmit(event) {
  */
 function handleJsonImport() {
     const jsonInput = document.getElementById('json-input').value.trim();
-    
-    if (!jsonInput) {
-        showError('Please paste JSON task data');
-        return;
-    }
+    if (!jsonInput) return showError('Please paste JSON task data');
     
     try {
         const importedTasks = JSON.parse(jsonInput);
+        if (!Array.isArray(importedTasks)) throw new Error('JSON must be an array of tasks');
         
-        // Validate it's an array
-        if (!Array.isArray(importedTasks)) {
-            throw new Error('JSON must be an array of tasks');
-        }
-        
-        // Validate each task
         for (const task of importedTasks) {
-            if (!task.title) {
-                throw new Error('Each task must have a title');
-            }
-            
-            // Set defaults if missing
-            if (!task.id) {
-                task.id = app.nextId++;
-            }
-            if (!task.due_date) {
-                task.due_date = new Date().toISOString().split('T')[0];
-            }
-            if (!task.estimated_hours) {
-                task.estimated_hours = 2;
-            }
-            if (!task.importance) {
-                task.importance = 5;
-            }
-            if (!task.dependencies) {
-                task.dependencies = [];
-            }
+            if (!task.title) throw new Error('Each task must have a title');
+            if (!task.id) task.id = app.nextId++;
+            if (!task.due_date) task.due_date = new Date().toISOString().split('T')[0];
+            if (!task.estimated_hours) task.estimated_hours = 2;
+            if (!task.importance) task.importance = 5;
+            if (!task.dependencies) task.dependencies = [];
         }
         
-        // Add to tasks
         app.tasks = app.tasks.concat(importedTasks);
-        
-        // Update next ID
         const maxId = Math.max(...app.tasks.map(t => t.id || 0));
         app.nextId = maxId + 1;
-        
-        // Update UI
         updateTaskList();
-        
-        // Clear input
         document.getElementById('json-input').value = '';
         
-        // Show success
         showSuccess(`Imported ${importedTasks.length} task(s) successfully!`);
-        
     } catch (error) {
         showError(`JSON Import Error: ${error.message}`);
     }
 }
 
 /**
- * Update the current tasks display
+ * Update task list display
  */
 function updateTaskList() {
     const taskListContainer = document.getElementById('task-list');
     const taskCountSpan = document.getElementById('task-count');
     const currentTasksSection = document.getElementById('current-tasks-section');
     
-    // Update count
     taskCountSpan.textContent = app.tasks.length;
     
-    // Show/hide section
     if (app.tasks.length === 0) {
         currentTasksSection.style.display = 'none';
         return;
     }
     
     currentTasksSection.style.display = 'block';
-    
-    // Clear existing list
     taskListContainer.innerHTML = '';
     
-    // Render each task
     app.tasks.forEach((task, index) => {
         const taskItem = document.createElement('div');
         taskItem.className = 'task-item';
         
-        const taskInfo = document.createElement('div');
-        taskInfo.className = 'task-item-info';
+        const info = document.createElement('div');
+        info.className = 'task-item-info';
         
-        const taskTitle = document.createElement('div');
-        taskTitle.className = 'task-item-title';
-        taskTitle.textContent = task.title;
+        const title = document.createElement('div');
+        title.className = 'task-item-title';
+        title.textContent = task.title;
         
-        const taskDetails = document.createElement('div');
-        taskDetails.className = 'task-item-details';
-        taskDetails.textContent = `Due: ${task.due_date} | Hours: ${task.estimated_hours} | Importance: ${task.importance}/10`;
+        const details = document.createElement('div');
+        details.className = 'task-item-details';
+        details.textContent = `Due: ${task.due_date} | Hours: ${task.estimated_hours} | Importance: ${task.importance}`;
         
         if (task.dependencies.length > 0) {
-            taskDetails.textContent += ` | Depends on: [${task.dependencies.join(', ')}]`;
+            details.textContent += ` | Depends on: [${task.dependencies.join(', ')}]`;
         }
         
-        taskInfo.appendChild(taskTitle);
-        taskInfo.appendChild(taskDetails);
+        info.appendChild(title);
+        info.appendChild(details);
         
         const removeBtn = document.createElement('button');
         removeBtn.className = 'task-item-remove';
         removeBtn.textContent = 'Remove';
-        removeBtn.addEventListener('click', () => removeTask(index));
+        removeBtn.onclick = () => removeTask(index);
         
-        taskItem.appendChild(taskInfo);
+        taskItem.appendChild(info);
         taskItem.appendChild(removeBtn);
-        
         taskListContainer.appendChild(taskItem);
     });
 }
 
 /**
- * Remove a task from the list
+ * Remove a task
  */
 function removeTask(index) {
     const task = app.tasks[index];
@@ -251,14 +180,13 @@ function removeTask(index) {
  */
 function handleClearAll() {
     if (app.tasks.length === 0) return;
+    if (!confirm('Are you sure you want to clear all tasks?')) return;
     
-    if (confirm('Are you sure you want to clear all tasks?')) {
-        app.tasks = [];
-        app.nextId = 1;
-        updateTaskList();
-        hideResults();
-        showSuccess('All tasks cleared');
-    }
+    app.tasks = [];
+    app.nextId = 1;
+    updateTaskList();
+    hideResults();
+    showSuccess('All tasks cleared');
 }
 
 /**
@@ -266,56 +194,39 @@ function handleClearAll() {
  */
 function handleStrategyChange(event) {
     app.currentStrategy = event.target.value;
-    const descriptionDiv = document.getElementById('strategy-description');
-    descriptionDiv.textContent = strategyDescriptions[app.currentStrategy];
+    document.getElementById('strategy-description').textContent =
+        strategyDescriptions[app.currentStrategy];
     
-    // Re-analyze if results are showing
-    if (app.tasks.length > 0 && document.getElementById('output-section').style.display !== 'none') {
+    if (app.tasks.length > 0 &&
+        document.getElementById('output-section').style.display !== 'none') {
         handleAnalyze();
     }
 }
 
 /**
- * Analyze tasks via API
+ * Analyze tasks (POST to backend)
  */
 async function handleAnalyze() {
-    if (app.tasks.length === 0) {
-        showError('Please add at least one task to analyze');
-        return;
-    }
+    if (app.tasks.length === 0) return showError('Please add at least one task');
     
-    // Show loading
     showLoading();
     hideMessages();
     hideResults();
     
     try {
-        // Call analyze API
         const response = await fetch(`${app.apiBaseUrl}/tasks/analyze/`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                tasks: app.tasks,
-                strategy: app.currentStrategy
-            })
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ tasks: app.tasks, strategy: app.currentStrategy })
         });
         
         const data = await response.json();
-        
         hideLoading();
         
-        if (!response.ok) {
-            throw new Error(data.error || 'Analysis failed');
-        }
+        if (!response.ok) throw new Error(data.error || 'Analysis failed');
         
-        // Display results
         displayResults(data);
-        
-        // Get suggestions
         await getSuggestions(data.sorted_tasks);
-        
     } catch (error) {
         hideLoading();
         showError(`Analysis Error: ${error.message}`);
@@ -323,15 +234,13 @@ async function handleAnalyze() {
 }
 
 /**
- * Get task suggestions via API
+ * Request suggestions
  */
 async function getSuggestions(sortedTasks) {
     try {
         const response = await fetch(`${app.apiBaseUrl}/tasks/suggest/`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 tasks: sortedTasks || app.tasks,
                 strategy: app.currentStrategy
@@ -339,47 +248,36 @@ async function getSuggestions(sortedTasks) {
         });
         
         const data = await response.json();
-        
-        if (response.ok) {
-            displaySuggestions(data.suggestions);
-        }
-        
+        if (response.ok) displaySuggestions(data.suggestions);
     } catch (error) {
         console.error('Error fetching suggestions:', error);
     }
 }
 
 /**
- * Display analysis results
+ * Render analysis results
  */
 function displayResults(data) {
     const outputSection = document.getElementById('output-section');
     const resultsList = document.getElementById('results-list');
     
-    // Clear existing results
     resultsList.innerHTML = '';
-    
-    // Show output section
     outputSection.style.display = 'block';
     
-    // Render each task
     data.sorted_tasks.forEach((task, index) => {
-        const card = createResultCard(task, index + 1);
-        resultsList.appendChild(card);
+        resultsList.appendChild(createResultCard(task, index + 1));
     });
     
-    // Scroll to results
     outputSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 /**
- * Create a result card element
+ * Create a result card UI
  */
 function createResultCard(task, rank) {
     const card = document.createElement('div');
     card.className = 'result-card';
     
-    // Header
     const header = document.createElement('div');
     header.className = 'result-header';
     
@@ -395,204 +293,147 @@ function createResultCard(task, rank) {
     header.appendChild(badge);
     card.appendChild(header);
     
-    // Scores
-    const scoresContainer = document.createElement('div');
-    scoresContainer.className = 'result-scores';
+    const scores = document.createElement('div');
+    scores.className = 'result-scores';
     
-    const scores = [
-        { label: 'Overall', value: task.priority_score },
-        { label: 'Urgency', value: task.urgency_score },
-        { label: 'Importance', value: task.importance_score },
-        { label: 'Effort', value: task.effort_score },
-        { label: 'Dependency', value: task.dependency_score }
-    ];
-    
-    scores.forEach(score => {
-        const scoreItem = document.createElement('div');
-        scoreItem.className = 'score-item';
+    [
+        ['Overall', task.priority_score],
+        ['Urgency', task.urgency_score],
+        ['Importance', task.importance_score],
+        ['Effort', task.effort_score],
+        ['Dependency', task.dependency_score]
+    ].forEach(([label, value]) => {
+        const item = document.createElement('div');
+        item.className = 'score-item';
         
-        const label = document.createElement('div');
-        label.className = 'score-label';
-        label.textContent = score.label;
+        const l = document.createElement('div');
+        l.className = 'score-label';
+        l.textContent = label;
         
-        const value = document.createElement('div');
-        value.className = 'score-value';
-        value.textContent = score.value.toFixed(1);
+        const v = document.createElement('div');
+        v.className = 'score-value';
+        v.textContent = value.toFixed(1);
         
-        scoreItem.appendChild(label);
-        scoreItem.appendChild(value);
-        scoresContainer.appendChild(scoreItem);
+        item.appendChild(l);
+        item.appendChild(v);
+        scores.appendChild(item);
     });
     
-    card.appendChild(scoresContainer);
+    card.appendChild(scores);
     
-    // Explanation
     const explanation = document.createElement('div');
     explanation.className = 'result-explanation';
     explanation.textContent = task.explanation;
     card.appendChild(explanation);
     
-    // Details
     const details = document.createElement('div');
     details.className = 'result-details';
-    
     const detailItems = [
         `📅 Due: ${task.due_date} (${formatDaysUntilDue(task.days_until_due)})`,
         `⏱️ Effort: ${task.estimated_hours} hour(s)`,
         `⭐ Importance: ${task.importance}/10`
     ];
     
-    if (task.dependencies && task.dependencies.length > 0) {
+    if (task.dependencies && task.dependencies.length)
         detailItems.push(`🔗 Depends on: [${task.dependencies.join(', ')}]`);
-    }
     
     detailItems.forEach(item => {
-        const detailItem = document.createElement('div');
-        detailItem.className = 'result-detail-item';
-        detailItem.textContent = item;
-        details.appendChild(detailItem);
+        const d = document.createElement('div');
+        d.className = 'result-detail-item';
+        d.textContent = item;
+        details.appendChild(d);
     });
     
     card.appendChild(details);
-    
     return card;
 }
 
 /**
- * Display task suggestions
+ * Show suggestions
  */
 function displaySuggestions(suggestions) {
     const suggestionsList = document.getElementById('suggestions-list');
-    
-    // Clear existing
     suggestionsList.innerHTML = '';
+    if (!suggestions?.length) return;
     
-    if (!suggestions || suggestions.length === 0) {
-        return;
-    }
-    
-    // Render each suggestion
     suggestions.forEach(suggestion => {
-        const card = createSuggestionCard(suggestion);
-        suggestionsList.appendChild(card);
+        suggestionsList.appendChild(createSuggestionCard(suggestion));
     });
 }
 
 /**
- * Create a suggestion card element
+ * Suggestion card UI
  */
-function createSuggestionCard(suggestion) {
+function createSuggestionCard(s) {
     const card = document.createElement('div');
     card.className = 'suggestion-card';
     
-    // Rank badge
     const rank = document.createElement('div');
     rank.className = 'suggestion-rank';
-    rank.textContent = `#${suggestion.rank}`;
+    rank.textContent = `#${s.rank}`;
+    
     card.appendChild(rank);
     
-    // Title
     const title = document.createElement('div');
     title.className = 'suggestion-title';
-    title.textContent = suggestion.task.title;
+    title.textContent = s.task.title;
     card.appendChild(title);
     
-    // Score
     const score = document.createElement('div');
     score.className = 'suggestion-score';
-    score.textContent = `Priority Score: ${suggestion.score.toFixed(1)}`;
+    score.textContent = `Priority Score: ${s.score.toFixed(1)}`;
     card.appendChild(score);
     
-    // Explanation
     const explanation = document.createElement('div');
     explanation.className = 'suggestion-explanation';
-    explanation.textContent = suggestion.explanation;
+    explanation.textContent = s.explanation;
     card.appendChild(explanation);
     
-    // Details
     const details = document.createElement('div');
     details.className = 'suggestion-details';
-    details.innerHTML = `
-        📅 Due: ${suggestion.task.due_date} | 
-        ⏱️ ${suggestion.task.estimated_hours}h | 
-        ⭐ ${suggestion.task.importance}/10
-    `;
-    card.appendChild(details);
+    details.textContent =
+        `📅 Due: ${s.task.due_date} | ⏱️ ${s.task.estimated_hours}h | ⭐ ${s.task.importance}/10`;
     
+    card.appendChild(details);
     return card;
 }
 
 /**
- * Format days until due in human-readable format
+ * Format due date
  */
 function formatDaysUntilDue(days) {
-    if (days < 0) {
-        return `${Math.abs(days)} day(s) overdue`;
-    } else if (days === 0) {
-        return 'Due today';
-    } else if (days === 1) {
-        return 'Due tomorrow';
-    } else {
-        return `${days} days remaining`;
-    }
+    if (days < 0) return `${Math.abs(days)} day(s) overdue`;
+    if (days === 0) return 'Due today';
+    if (days === 1) return 'Due tomorrow';
+    return `${days} days remaining`;
 }
 
 /**
- * Show loading indicator
+ * UI helpers
  */
 function showLoading() {
     document.getElementById('loading').style.display = 'block';
 }
-
-/**
- * Hide loading indicator
- */
 function hideLoading() {
     document.getElementById('loading').style.display = 'none';
 }
-
-/**
- * Show error message
- */
 function showError(message) {
-    const errorDiv = document.getElementById('error-message');
-    errorDiv.textContent = message;
-    errorDiv.style.display = 'block';
-    
-    // Auto-hide after 5 seconds
-    setTimeout(() => {
-        errorDiv.style.display = 'none';
-    }, 5000);
-    
-    // Scroll to message
-    errorDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    const e = document.getElementById('error-message');
+    e.textContent = message;
+    e.style.display = 'block';
+    setTimeout(() => e.style.display = 'none', 5000);
+    e.scrollIntoView({ behavior: 'smooth' });
 }
-
-/**
- * Show success message
- */
 function showSuccess(message) {
-    const successDiv = document.getElementById('success-message');
-    successDiv.textContent = message;
-    successDiv.style.display = 'block';
-    
-    // Auto-hide after 3 seconds
-    setTimeout(() => {
-        successDiv.style.display = 'none';
-    }, 3000);
+    const s = document.getElementById('success-message');
+    s.textContent = message;
+    s.style.display = 'block';
+    setTimeout(() => s.style.display = 'none', 3000);
 }
-
-/**
- * Hide all messages
- */
 function hideMessages() {
     document.getElementById('error-message').style.display = 'none';
     document.getElementById('success-message').style.display = 'none';
 }
-
-/**
- * Hide results section
- */
 function hideResults() {
     document.getElementById('output-section').style.display = 'none';
 }
