@@ -7,6 +7,7 @@ services:
 
     buildCommand: |
       pip install --upgrade pip
+      pip install whitenoise
       pip install -r requirements.txt
       python backend/manage.py collectstatic --noinput
 
