@@ -20,19 +20,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
 # SECURITY CONFIGURATION
 # ======================================================
 SECRET_KEY = os.getenv('SECRET_KEY', 'dev-secret-key-change-me')
-
 DEBUG = os.getenv('DEBUG', 'True') == 'True'
 
-
-# Accept all Render domains automatically
 ALLOWED_HOSTS = [
     '.onrender.com',
     'localhost',
     '127.0.0.1'
 ]
 
-
-# Required for POST/CSRF protection in production
 CSRF_TRUSTED_ORIGINS = [
     'https://*.onrender.com',
 ]
@@ -58,10 +53,11 @@ INSTALLED_APPS = [
 
 
 # ======================================================
-# MIDDLEWARE
+# MIDDLEWARE (WhiteNoise Added)
 # ======================================================
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # <-- REQUIRED FOR STATIC ON RENDER
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -80,7 +76,7 @@ ROOT_URLCONF = 'task_analyzer.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'frontend'],
+        'DIRS': [BASE_DIR / 'frontend'],  # <-- Your HTML folder
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -129,18 +125,21 @@ USE_TZ = True
 
 
 # ======================================================
-# STATIC FILES (REQUIRED FOR RENDER)
+# STATIC FILES (STATIC + WHITENOISE + FRONTEND SUPPORT)
 # ======================================================
 
 STATIC_URL = '/static/'
 
-# Your raw frontend files (CSS, JS, images)
+# Your raw CSS, JS, images (frontend folder)
 STATICFILES_DIRS = [
     BASE_DIR / 'frontend',
 ]
 
-# Where collectstatic will place final static files (Render requires this!)
+# For Render deployment
 STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+# WhiteNoise storage for compressed cached files
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 
 # ======================================================
