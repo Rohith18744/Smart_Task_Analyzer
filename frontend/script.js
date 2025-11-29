@@ -4,7 +4,7 @@ const app = {
     nextId: 1,
     currentStrategy: 'smart_balance',
     // Updated to use Render backend base URL
-    apiBaseUrl: 'https://smart-task-analyzer-14.onrender.com/api/v1'
+    apiBaseUrl: 'https://smart-task-analyzer-16.onrender.com/api/v1'
 };
 
 const strategyDescriptions = {
