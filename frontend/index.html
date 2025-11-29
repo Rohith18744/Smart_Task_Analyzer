@@ -4,11 +4,8 @@
   <meta charset="UTF-8" />
   <title>Smart Task Analyzer</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-  <!-- Load CSS with correct absolute path -->
-  <link rel="stylesheet" href="https://smart-task-analyzer-16.onrender.com/static/styles.css" />
+  <link rel="stylesheet" href="styles.css" />
 </head>
-
 <body>
   <div class="app-wrapper">
     <!-- Top Navigation Bar -->
@@ -23,13 +20,12 @@
     </nav>
 
     <div class="main-container">
-      <!-- Strategy Panel -->
+      <!-- Strategy Control Panel -->
       <section class="strategy-panel">
         <div class="panel-header">
           <h2>Analysis Strategy</h2>
           <p class="panel-subtitle">Choose how tasks should be evaluated</p>
         </div>
-
         <div class="strategy-controls">
           <select id="strategy" class="strategy-select">
             <option value="smart_balance">Smart Balance</option>
@@ -37,7 +33,6 @@
             <option value="high_impact">High Impact</option>
             <option value="deadline_driven">Deadline Driven</option>
           </select>
-
           <div class="strategy-info">
             <p id="strategy-desc" class="strategy-text">
               Balances all factors: urgency, importance, effort, and dependencies.
@@ -46,20 +41,24 @@
         </div>
       </section>
 
-      <!-- Grid Layout -->
+      <!-- Two Column Layout -->
       <div class="workspace-grid">
-        
-        <!-- Left: Input Panel -->
+        <!-- Left: Task Input -->
         <section class="input-panel">
           <div class="panel-title">
             <span class="title-icon">➕</span>
             <h3>Create New Task</h3>
           </div>
-
+          
           <form id="task-form" class="input-form">
             <div class="input-field">
               <label for="title">Task Name</label>
-              <input id="title" type="text" placeholder="Enter task description" required />
+              <input 
+                id="title" 
+                type="text" 
+                placeholder="Enter task description" 
+                required 
+              />
             </div>
 
             <div class="input-row">
@@ -69,18 +68,36 @@
               </div>
               <div class="input-field half">
                 <label for="estimated_hours">Time Required</label>
-                <input id="estimated_hours" type="number" step="0.25" min="0" placeholder="Hours" required />
+                <input
+                  id="estimated_hours"
+                  type="number"
+                  step="0.25"
+                  min="0"
+                  placeholder="Hours"
+                  required
+                />
               </div>
             </div>
 
             <div class="input-row">
               <div class="input-field half">
                 <label for="importance">Priority Level</label>
-                <input id="importance" type="number" min="1" max="10" placeholder="1-10" required />
+                <input
+                  id="importance"
+                  type="number"
+                  min="1"
+                  max="10"
+                  placeholder="1-10"
+                  required
+                />
               </div>
               <div class="input-field half">
                 <label for="dependencies">Blocked By</label>
-                <input id="dependencies" type="text" placeholder="Task IDs" />
+                <input
+                  id="dependencies"
+                  type="text"
+                  placeholder="Task IDs"
+                />
               </div>
             </div>
 
@@ -89,28 +106,29 @@
             </button>
           </form>
 
-          <!-- JSON Bulk Import -->
           <div class="bulk-import">
             <div class="import-header">
               <span class="import-icon">📋</span>
               <span>Bulk Import</span>
             </div>
-
-            <textarea id="bulk-json" class="json-input" rows="5"
-              placeholder='Paste JSON array of tasks here...'></textarea>
-
+            <textarea
+              id="bulk-json"
+              class="json-input"
+              rows="5"
+              placeholder='Paste JSON array of tasks here...'
+            ></textarea>
             <button id="load-bulk" class="import-btn">Import Tasks</button>
           </div>
         </section>
 
-        <!-- Right: Queue Panel -->
+        <!-- Right: Task Queue -->
         <section class="queue-panel">
           <div class="panel-title">
             <span class="title-icon">📝</span>
             <h3>Task Queue</h3>
             <span class="task-counter" id="task-count">0</span>
           </div>
-
+          
           <div id="current-tasks-list" class="queue-list">
             <div class="empty-state">
               <div class="empty-icon">📭</div>
@@ -120,14 +138,20 @@
           </div>
 
           <div class="queue-actions">
-            <button id="analyze-btn" class="action-btn primary">Run Analysis</button>
-            <button id="top3-btn" class="action-btn accent">Top 3 Recommendations</button>
-            <button id="clear-all-btn" class="action-btn secondary">Reset Queue</button>
+            <button id="analyze-btn" class="action-btn primary">
+              <span>Run Analysis</span>
+            </button>
+            <button id="top3-btn" class="action-btn accent">
+              <span>Top 3 Recommendations</span>
+            </button>
+            <button id="clear-all-btn" class="action-btn secondary">
+              <span>Reset Queue</span>
+            </button>
           </div>
         </section>
       </div>
 
-      <!-- Results Panel -->
+      <!-- Bottom: Analysis Output -->
       <section class="results-panel">
         <div class="results-header">
           <div class="results-title">
@@ -136,7 +160,7 @@
           </div>
           <span class="results-subtitle">Top 3 tasks to focus on</span>
         </div>
-
+        
         <div id="recommendations-container" class="recommendations-grid">
           <div class="empty-state">
             <div class="empty-icon">🔍</div>
@@ -149,8 +173,7 @@
     <div id="feedback" class="notification"></div>
   </div>
 
-  <!-- Load JS correctly -->
-  <script src="https://smart-task-analyzer-16.onrender.com/static/config.js"></script>
-  <script src="https://smart-task-analyzer-16.onrender.com/static/script.js"></script>
+  <script src="config.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
